@@ -22,7 +22,6 @@ import scala.collection.mutable
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.scheduler._
 
-
 /**
  * :: DeveloperApi ::
  * A modified version of StorageStatusListener that tracks the peak memory usage during the entire application runtime.
@@ -77,7 +76,7 @@ class StorageStatusTrackingListener extends SparkListener {
       val info = taskEnd.taskInfo
       val metrics = taskEnd.taskMetrics
       if (info != null && metrics != null) {
-        val updatedBlocks = metrics.updatedBlocks.getOrElse(Seq[(BlockId, BlockStatus)]())
+        val updatedBlocks = metrics.updatedBlockStatuses
         if (updatedBlocks.length > 0) {
           updateStorageStatus(info.executorId, updatedBlocks)
         }
@@ -96,7 +95,7 @@ class StorageStatusTrackingListener extends SparkListener {
       val blockManagerId = blockManagerAdded.blockManagerId
       val executorId = blockManagerId.executorId
       val maxMem = blockManagerAdded.maxMem
-      val storageStatus = new StorageStatus(blockManagerId, maxMem)
+      val storageStatus = new StorageStatus(blockManagerId, maxMem, None, None)
       executorIdToStorageStatus(executorId) = storageStatus
     }
   }
