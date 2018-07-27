@@ -41,6 +41,7 @@ trait SparkUtils {
 
   val SPARK_EVENT_LOG_DIR_KEY = "spark.eventLog.dir"
   val SPARK_EVENT_LOG_COMPRESS_KEY = "spark.eventLog.compress"
+  val SPARK_HISTORY_SERVER_IP_KEY = "spark.yarn.historyServer.address"
   val DFS_HTTP_PORT = 50070
 
   /**
@@ -66,8 +67,10 @@ trait SparkUtils {
       eventLogUri match {
         case Some(uri) if uri.getScheme == "webhdfs" =>
           (FileSystem.get(uri, hadoopConfiguration), new Path(uri.getPath))
-        case Some(uri) if uri.getScheme == "hdfs" =>
+        case Some(uri) if uri.getScheme == "hdfs" && uri.getHost != null =>
           (FileSystem.get(new URI(s"webhdfs://${uri.getHost}:${DFS_HTTP_PORT}${uri.getPath}"), hadoopConfiguration), new Path(uri.getPath))
+        case Some(uri) if uri.getScheme == "hdfs" && uri.getHost == null =>
+          (FileSystem.get(new URI(s"webhdfs://${new URI("http://" + sparkConf.getOption(SPARK_HISTORY_SERVER_IP_KEY).get.toString).getHost}:${DFS_HTTP_PORT}${uri.getPath}"), hadoopConfiguration), new Path(uri.getPath))
         case Some(uri) =>
           val nameNodeAddress
           = hadoopUtils.findHaNameNodeAddress(hadoopConfiguration)
