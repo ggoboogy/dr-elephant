@@ -89,6 +89,9 @@
   <fetcher>
     <applicationtype>spark</applicationtype>
     <classname>com.linkedin.drelephant.spark.fetchers.FSFetcher</classname>
+    <params>
+      <event_log_size_limit_in_mb>200</event_log_size_limit_in_mb>
+    </params>
   </fetcher>
 
   <!--
